@@ -1,0 +1,33 @@
+{
+    "name": "jpzip/jpzip",
+    "description": "jpzip PHP SDK — 日本の郵便番号を CDN 配信の JSON データから引く",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["jpzip", "zipcode", "postal-code", "japan", "sdk"],
+    "homepage": "https://jpzip.nadai.dev",
+    "require": {
+        "php": "^8.2",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jpzip\\": "src/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Jpzip\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable"
+}
