@@ -28,9 +28,9 @@ final class ClientTest extends TestCase
         'city_roma' => 'Yokohama Shi Naka Ku',
         'city_code' => '14104',
         'towns' => [[
-            'town' => '矢口台',
-            'kana' => 'ヤグチダイ',
-            'roma' => 'Yaguchidai',
+            'town' => '本町',
+            'kana' => 'ホンチョウ',
+            'roma' => 'Honcho',
         ]],
     ];
 
@@ -53,23 +53,23 @@ final class ClientTest extends TestCase
 
     public function testIsValidZipcode(): void
     {
-        self::assertTrue(isValidZipcode('2310831'));
+        self::assertTrue(isValidZipcode('2310017'));
         self::assertFalse(isValidZipcode('231083'));
         self::assertFalse(isValidZipcode('abcdefg'));
-        self::assertFalse(isValidZipcode('23108311'));
+        self::assertFalse(isValidZipcode('23100171'));
     }
 
     public function testLookupReturnsEntry(): void
     {
-        $body = json_encode(['2310831' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
+        $body = json_encode(['2310017' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
         $client = $this->makeClient([new Response(200, [], $body)]);
 
-        $entry = $client->lookup('2310831');
+        $entry = $client->lookup('2310017');
         self::assertInstanceOf(ZipcodeEntry::class, $entry);
         self::assertSame('神奈川県', $entry->prefecture);
         self::assertSame('横浜市中区', $entry->city);
         self::assertCount(1, $entry->towns);
-        self::assertSame('矢口台', $entry->towns[0]->town);
+        self::assertSame('本町', $entry->towns[0]->town);
     }
 
     public function testLookupMalformedReturnsNullWithoutNetwork(): void
@@ -93,22 +93,22 @@ final class ClientTest extends TestCase
 
     public function testLookupCachesPrefix(): void
     {
-        $body = json_encode(['2310831' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
+        $body = json_encode(['2310017' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
         // 2 回目は MockHandler が空なので、もしネットワークに行けば例外。
         $client = $this->makeClient([new Response(200, [], $body)]);
 
-        self::assertNotNull($client->lookup('2310831'));
+        self::assertNotNull($client->lookup('2310017'));
         // L1 ヒットで再 fetch しない。
-        self::assertNotNull($client->lookup('2310831'));
+        self::assertNotNull($client->lookup('2310017'));
     }
 
     public function testLookupGroupThreeDigit(): void
     {
-        $body = json_encode(['2310831' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
+        $body = json_encode(['2310017' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
         $client = $this->makeClient([new Response(200, [], $body)]);
 
         $dict = $client->lookupGroup('231');
-        self::assertArrayHasKey('2310831', $dict);
+        self::assertArrayHasKey('2310017', $dict);
     }
 
     public function testLookupGroupTwoDigitFanOut(): void
@@ -122,7 +122,7 @@ final class ClientTest extends TestCase
                 ], JSON_UNESCAPED_UNICODE));
             } elseif ($i === 1) {
                 $responses[] = new Response(200, [], json_encode([
-                    '2310831' => self::SAMPLE_ENTRY,
+                    '2310017' => self::SAMPLE_ENTRY,
                 ], JSON_UNESCAPED_UNICODE));
             } else {
                 $responses[] = new Response(404);
@@ -132,13 +132,13 @@ final class ClientTest extends TestCase
         $dict = $client->lookupGroup('23');
         self::assertCount(2, $dict);
         self::assertArrayHasKey('2300001', $dict);
-        self::assertArrayHasKey('2310831', $dict);
+        self::assertArrayHasKey('2310017', $dict);
     }
 
     public function testLookupGroupOneDigit(): void
     {
         $body = json_encode([
-            '2310831' => self::SAMPLE_ENTRY,
+            '2310017' => self::SAMPLE_ENTRY,
             '2300001' => self::SAMPLE_ENTRY,
         ], JSON_UNESCAPED_UNICODE);
         $client = $this->makeClient([new Response(200, [], $body)]);
@@ -170,16 +170,16 @@ final class ClientTest extends TestCase
 
     public function testRefreshClearsCache(): void
     {
-        $body = json_encode(['2310831' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
+        $body = json_encode(['2310017' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
         // 1 度目のあと refresh → 2 度目もネットワーク。
         $client = $this->makeClient([
             new Response(200, [], $body),
             new Response(200, [], $body),
         ]);
 
-        self::assertNotNull($client->lookup('2310831'));
+        self::assertNotNull($client->lookup('2310017'));
         $client->refresh();
-        self::assertNotNull($client->lookup('2310831'));
+        self::assertNotNull($client->lookup('2310017'));
     }
 
     public function testGetMetaCachesAcrossCalls(): void
@@ -206,7 +206,7 @@ final class ClientTest extends TestCase
 
     public function testMetaVersionChangeInvalidatesCache(): void
     {
-        $entryBody = json_encode(['2310831' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
+        $entryBody = json_encode(['2310017' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
         $metaV1 = json_encode([
             'version' => '2026-05',
             'generated_at' => '2026-05-01T00:00:00Z',
@@ -237,7 +237,7 @@ final class ClientTest extends TestCase
         ], $cache);
 
         self::assertNotNull($client->getMeta());
-        self::assertNotNull($client->lookup('2310831'));
+        self::assertNotNull($client->lookup('2310017'));
         self::assertNotEmpty($cache->store);
 
         // refresh して meta を再取得 → version 変化で L1/L2 が消える。
@@ -245,7 +245,7 @@ final class ClientTest extends TestCase
         self::assertNotNull($client->getMeta());
         // Refresh で clear、その後 meta の version 比較がトリガーされる前に refresh 自体が L2 を空にしている。
         // ここでは「再取得しても落ちない」「最終的な lookup が成功する」ことを確認する。
-        self::assertNotNull($client->lookup('2310831'));
+        self::assertNotNull($client->lookup('2310017'));
     }
 
     public function testSpecMismatchCallbackInvoked(): void
@@ -280,12 +280,12 @@ final class ClientTest extends TestCase
 
     public function testRetryOn5xx(): void
     {
-        $body = json_encode(['2310831' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
+        $body = json_encode(['2310017' => self::SAMPLE_ENTRY], JSON_UNESCAPED_UNICODE);
         $client = $this->makeClient([
             new Response(500),
             new Response(503),
             new Response(200, [], $body),
         ]);
-        self::assertNotNull($client->lookup('2310831'));
+        self::assertNotNull($client->lookup('2310017'));
     }
 }

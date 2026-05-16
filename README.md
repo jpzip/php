@@ -26,7 +26,7 @@ use function Jpzip\lookupAll;
 use function Jpzip\getMeta;
 use function Jpzip\isValidZipcode;
 
-$entry = lookup('2310831');
+$entry = lookup('2310017');
 // $entry === null なら見つからなかった
 echo $entry?->prefecture; // "神奈川県"
 echo $entry?->city;       // "横浜市中区"
@@ -35,7 +35,7 @@ $dict = lookupGroup('23');  // 2 桁は 10 並列 fetch
 $all  = lookupAll();
 $meta = getMeta();
 
-isValidZipcode('2310831'); // true
+isValidZipcode('2310017'); // true
 ```
 
 ### クライアント API (L2 キャッシュ・複数インスタンス用)
@@ -55,7 +55,7 @@ $client = new Client(
 );
 
 $client->preload('all');
-$entry = $client->lookup('2310831');
+$entry = $client->lookup('2310017');
 ```
 
 ## Cache インターフェース
