@@ -288,4 +288,15 @@ final class ClientTest extends TestCase
         ]);
         self::assertNotNull($client->lookup('2310017'));
     }
+
+    public function testNoRetryOn4xx(): void
+    {
+        // Regression: a non-404 4xx must propagate immediately. If retry
+        // logic accidentally treated it as transient, MockHandler would run
+        // out of responses on attempts 2 and 3 and throw a different error.
+        $client = $this->makeClient([new Response(403)]);
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('/403/');
+        $client->lookup('2310017');
+    }
 }
