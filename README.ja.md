@@ -1,5 +1,6 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/jpzip/jpzip.svg)](https://packagist.org/packages/jpzip/jpzip)
 [![PHP Version Require](https://img.shields.io/packagist/php-v/jpzip/jpzip.svg)](https://packagist.org/packages/jpzip/jpzip)
+[![Docs](https://img.shields.io/badge/docs-jpzip.nadai.dev-0066cc.svg)](https://jpzip.nadai.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Test](https://github.com/jpzip/php/actions/workflows/test.yml/badge.svg)](https://github.com/jpzip/php/actions/workflows/test.yml)
 
